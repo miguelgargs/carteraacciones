@@ -26,17 +26,24 @@ from pdfminer.pdfparser import PDFParser
 #   I can retrieve all the other values just by taking into account that decimal values are
 #   represented with two digits after the comma.
 
+# Maybe I can build a huge-ass regular expression to parse this by lines...
+
 
 class SingularBankParser():
     """
     Class for parsing data from SingularBank values basket.
     """
+    
 
     def __init__(self):
         """
         Class instance.
         """
         self.PDF_HEADER = ''
+        # self.PDF_LINE = re.compile('[A-Z][A-Z](([0-9]|[A-Z]){10}) (-?[0-9],([0-9]{2}){6})')
+        self.VALUE_CODE = re.compile('[A-Z][A-Z](([0-9]|[A-Z]){10})') # value code
+        self.VALUE_DATA = re.compile('(-)?[0-9]+,([0-9]){2}') # data from the value code
+
 
     def process_list_of_values(self, values_list: list):
         """
@@ -45,18 +52,26 @@ class SingularBankParser():
         They have two capital letters at the begginning and the rest are 10 digits.
         """
         for item in values_list:
-            # print(f'item->{item}')
+            item = item.strip()
+            print(f'item->{item}')
             # get the value code:
             value_code = ''
             value_price = ''
 
-            value_code_match = re.search('[A-Z][A-Z](([0-9]|[A-Z]){10})', item)
+            # value_code_match = re.search('[A-Z][A-Z](([0-9]|[A-Z]){10})', item)
+            value_code_match = re.search(self.VALUE_CODE, item)
+            data_value_match = re.search(self.VALUE_DATA, item)
             # value_price = item.split(value_code)[0]
             if value_code_match is not None:
                 value_code = value_code_match.group(0)
                 value_price = item.split(value_code)[1].strip()
                 print(f'value_code={value_code}')
                 print(f'value_price={value_price} EUR')
+
+            elif data_value_match is not None:
+               # this means we get the data
+               print(f'Under construction') 
+
 
     def parse_pdf(self, documents_path: Path, output_path: Path):
         """
