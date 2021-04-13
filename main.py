@@ -21,14 +21,6 @@ from pdfminer.pdfparser import PDFParser
 #   If this happens, just run the first method, comment it out, then modify the file and add the '€'
 #   where it's missing, and run the second method.
 
-# TODO
-# - right now I'm only retrieving last values (Últ.valor) because it was the easiest.
-#   I can retrieve all the other values just by taking into account that decimal values are
-#   represented with two digits after the comma.
-
-# Maybe I can build a huge-ass regular expression to parse this by lines...
-
-
 class Value():
     """
     Represents a Value with its ISIN code, last price, change since last month,
@@ -83,7 +75,6 @@ class SingularBankParser():
 
         for item in values_list:
             item = item.strip()
-            print(f'item->{item}')
 
             if len(item) > 1:
                 # get the value code:
@@ -96,7 +87,6 @@ class SingularBankParser():
                     false_positive = True if re.match(
                         self.VALUE_CODE_GENERAL, item) is not None else False
                     if not false_positive:
-                        print(f'data in the item={item}')
                         one_month = re.search(self.VALUE_DATA, item).group(0)
                         item = item.replace(one_month, '')
                         three_months = re.search(
@@ -120,7 +110,6 @@ class SingularBankParser():
                 value_code_match = re.search(self.VALUE_CODE_GENERAL, item)
                 if value_code_match is not None:
                     match_object = value_code_match.group(0)
-                    print(f'match_object={match_object}')
                     value_code = re.search(
                         self.VALUE_CODE_SPECIFIC, match_object).group(0)
                     match_object = match_object.replace(value_code, '')
@@ -130,14 +119,11 @@ class SingularBankParser():
                     value_price = re.search(
                         self.LAST_PRICE, match_object).group(0)
                     item = item.replace(value_price, '')  # remove the price
-                    print(f'value_code={value_code}')
-                    print(f'value_price={value_price} EUR')
 
                     value = Value(isin=value_code, last_price=value_price)
 
                     last_value = value
-                    print(f'last_value now has an object={last_value}')
-                    print(f'item after processing codes={item}')
+
         # finished iterating through data. Print list
         self.print_csv()
 
@@ -187,8 +173,6 @@ class SingularBankParser():
             # read text and split the codes and prices
 
             for line in infile:
-                # self.process_list_of_values2(line)
-                # print(f'line={line}')
                 if '€' in line:
                     self.process_list_of_values(line.split('€'))
 
